@@ -1,0 +1,131 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "nginx-trainee.fullname.nginx" . }}
+  namespace: {{ .Release.Namespace }}
+data:
+  nginx.conf: |
+    worker_processes  auto;
+
+    error_log  /var/log/nginx/error.log notice;
+    pid        /var/run/nginx/nginx.pid;
+
+    load_module modules/ngx_http_image_filter_module.so;
+
+    events {
+        worker_connections  1024;
+    }
+
+
+    http {
+
+
+        upstream backend {
+        server {{ include "nginx-trainee.fullname.apache-blue" . }}.{{ .Release.Namespace }};
+        server {{ include "nginx-trainee.fullname.apache-red" . }}.{{ .Release.Namespace }};
+        }
+
+        include       /etc/nginx/mime.types;
+        default_type  application/octet-stream;
+
+        log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                        '$status $body_bytes_sent "$http_referer" '
+                        '"$http_user_agent" "$http_x_forwarded_for"';
+
+        access_log  /var/log/nginx/access.log  main;
+
+        sendfile        on;
+        #tcp_nopush     on;
+
+        keepalive_timeout  65;
+
+        #gzip  on;
+
+        # include /etc/nginx/conf.d/*.conf;
+        include /etc/nginx/sites-enabled/*;
+    }
+
+  default.conf: |
+
+    map $arg_rotate $rotate_volume {
+    default 180;
+    90 90;
+    180 180;
+    270 270;
+    }
+
+      server {
+          listen 8888;
+          location /stub_status {
+              stub_status on;
+              access_log off;
+          }
+      }
+
+
+    server {
+    server_name example.com;
+    listen 80 ;
+    listen [::]:80 ;
+
+    #auth_basic "Restricted Area";
+    #auth_basic_user_file /etc/nginx/auth;
+
+    root /var/www/html;
+
+    index index.nginx-debian.html;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    location /secondpage {
+        try_files /secondpage.html =404;
+    }
+
+    location /music {
+        try_files /music.mp3 =404;
+        add_header Content-Disposition 'attachment; filename="music.mp3"';
+        add_header Content-Type audio/mpeg;
+    }
+
+    location /info.php {
+        proxy_pass http://localhost:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_redirect http:// $scheme://$host;
+    }
+
+    location /redblue {
+        proxy_pass http://backend/;
+
+        proxy_redirect default;
+    }
+
+
+    location /secondserver {
+        proxy_pass https://www.wikipedia.org/;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /image1 {
+        rewrite ^/image1(.*) /images/image1.jpg last;
+    }
+
+    location ~* \.jpg$ {
+        image_filter rotate $rotate_volume;
+        image_filter_buffer 20M;
+        image_filter_jpeg_quality 85;
+    }
+
+
+    location /image2 {
+        rewrite ^/image2(.*) /images/image2.png last;
+    }
+
+    }
+  

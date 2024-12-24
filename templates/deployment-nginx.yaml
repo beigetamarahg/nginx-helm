@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "nginx-trainee.fullname" . }}
+  name: {{ include "nginx-trainee.fullname.nginx" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "nginx-trainee.labels" . | nindent 4 }}
@@ -24,10 +24,6 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
-      {{- with .Values.imagePullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
       serviceAccountName: {{ include "nginx-trainee.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
@@ -46,13 +42,40 @@ spec:
           readinessProbe:
             {{- toYaml .Values.readinessProbe | nindent 12 }}
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
-          {{- with .Values.volumeMounts }}
+            {{- toYaml .Values.resources | nindent 12 }}   
           volumeMounts:
+          - name: nginx-config-volume
+            mountPath: /etc/nginx/nginx.conf
+            subPath: nginx.conf
+          - name: nginx-config-volume
+            mountPath: /etc/nginx/sites-enabled/default
+            subPath: default.conf
+          #- name: nginx-auth
+          #  mountPath: /etc/nginx/auth
+          #  subPath: yc-key
+          {{- with .Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
-      {{- with .Values.volumes }}
+        - name: apache-php
+          image: beigetamarah/apache2-trainee5:latest
+          ports:
+            - containerPort: 8080
+        - name: nginx-exporter
+          image: nginx/nginx-prometheus-exporter:latest
+          args:
+            - --nginx.scrape-uri=http://127.0.0.1:8888/stub_status
+          ports:
+            - containerPort: {{ .Values.metrics.port }}
+              name: metrics
+      
       volumes:
+      #- name: nginx-auth
+      #  secret:
+      #    secretName: {{ include "nginx-trainee.fullname.nginx" . }}
+      - name: nginx-config-volume
+        configMap:
+          name: {{ include "nginx-trainee.fullname.nginx" . }}
+      {{- with .Values.volumes }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- with .Values.nodeSelector }}

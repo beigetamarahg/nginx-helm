@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "nginx-trainee.fullname.apache-blue" . }}
+  namespace: {{ .Release.Namespace }}
+data:
+  index.html: |
+    <html><body style="width: 100%; height: 100%; background: blue;"><h1>Welcome to Blue Server</h1></body></html>
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "nginx-trainee.fullname.apache-red" . }}
+  namespace: {{ .Release.Namespace }}
+data:
+  index.html: |
+    <html><body style="width: 100%; height: 100%; background: red;"><h1>Welcome to Red Server</h1></body></html>

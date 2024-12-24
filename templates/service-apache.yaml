@@ -1,0 +1,34 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "nginx-trainee.fullname.apache-blue" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "nginx-trainee.labels.apache-blue" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.typeApache }}
+  ports:
+    - port: {{ .Values.service.portApache }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "nginx-trainee.selectorLabels.apache-blue" . | nindent 4 }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "nginx-trainee.fullname.apache-red" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "nginx-trainee.labels.apache-red" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.typeApache }}
+  ports:
+    - port: {{ .Values.service.portApache }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "nginx-trainee.selectorLabels.apache-red" . | nindent 4 }}

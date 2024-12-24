@@ -3,12 +3,12 @@ entries:
   nginx-trainee:
   - apiVersion: v2
     appVersion: 1.16.0
-    created: "2024-12-24T22:12:26.46119843+03:00"
+    created: "2024-12-24T22:17:07.84372444+03:00"
     description: A Helm chart for Kubernetes
     digest: 0ce9a92c33d7ec1f693609f50ccfeda2f80e5701edff17c454addc334329990e
     name: nginx-trainee
     type: application
     urls:
-    - https://github.com/beigetamarahg/nginx-helm/docs/nginx-trainee-0.1.0.tgz
+    - https://beigetamarahg.github.io/nginx-helm/nginx-trainee-0.1.0.tgz
     version: 0.1.0
-generated: "2024-12-24T22:12:26.460536392+03:00"
+generated: "2024-12-24T22:17:07.843079535+03:00"

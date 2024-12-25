@@ -2,7 +2,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "nginx-trainee.fullname" . }}
+  name: {{ include "nginx-trainee.fullname.nginx" . }}
   namespace: {{ .Release.Namespace }} 
   labels:
     {{- include "nginx-trainee.labels" . | nindent 4 }}

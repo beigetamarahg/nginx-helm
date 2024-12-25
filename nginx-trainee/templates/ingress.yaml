@@ -36,7 +36,7 @@ spec:
             {{- end }}
             backend:
               service:
-                name: {{ include "nginx-trainee.fullname.nginx" . }}
+                name: {{ include "nginx-trainee.fullname.nginx" $ }}
                 port:
                   number: {{ $.Values.service.port }}
           {{- end }}

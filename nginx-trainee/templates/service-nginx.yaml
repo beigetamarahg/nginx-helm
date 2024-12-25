@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "nginx-trainee.fullname" . }}
+  name: {{ include "nginx-trainee.fullname.nginx" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "nginx-trainee.labels" . | nindent 4 }}
